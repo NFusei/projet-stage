@@ -5,17 +5,35 @@ var router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const dbName = 'db/map_admin.db';
 
-app.use(express.static('public'));
-module.exports = router;
+async function getTeam(teamId) {
+  const result = await new Promise((resolve, reject) => {
+    db.get('SELECT * FROM Teams WHERE id = $id', {
+      $id : teamId
+    }, (err, data)=>{
+      resolve(data);
+    });
+  });
+  return result;
+}
 
-/* BDD */
-let db = new sqlite3.Database(dbName, err => {
+async function getTeams() {
+  const result = await new Promise((resolve, reject) => {
+    db.all('SELECT * FROM Teams', (err, data) => {
+      resolve(data);
+    });
+  });
+  return result;
+};
+
+const db = new sqlite3.Database(dbName, err => {
   if(err)
     throw err
     console.log('Database stated on ' + dbName);
 });
 
-/* GET home page. */
+app.use(express.static('public'));
+module.exports = router;
+
 router.get('/',async function(req, res, next) {
   const teamsData = await getTeams();console.log(teamsData);
   res.render('index', 
@@ -100,50 +118,3 @@ router.post('/editTeam', async function(req, res, next) {
     teamsData: teamsData, 
   });
 });
-
-async function getTeam(teamId) {
-  const result = await new Promise((resolve, reject) => {
-    db.get('SELECT * FROM Teams WHERE id = $id', {
-      $id : teamId
-    }, (err, data)=>{
-      resolve(data);
-    });
-  });
-  return result;
-}
-
-async function getTeams() {
-  const result = await new Promise((resolve, reject) => {
-    db.all('SELECT * FROM Teams', (err, data) => {
-      resolve(data);
-    });
-  });
-  // console.log(result);
-  return result;
-};
-  // db.all('SELECT * FROM Teams', (err, data) => {
-  //   if(err)
-  //     throw err
-
-  //   console.log(data);
-  // });
-  // console.log(result);
-  // return result;
-  
-
-
-
-// router.get('/getTeam', function(req, res, next) {
-//   const teamId = req.query.teamId;
-//   res.send(getTeam(teamId));
-// });
-
-// function getTeam(teamId) {
-  
-// }
-
-// function isTeam(){
-
-// }
-
-
